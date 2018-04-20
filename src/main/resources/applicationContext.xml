@@ -81,6 +81,8 @@
 		<tx:attributes>
 			<!--是AccountServiceImpl类中的transfer方法添加上事务。-->
 			<tx:method name="transfer" propagation="REQUIRED"/>
+			<!--BookServiceImpl中的appoint方法-->
+			<tx:method name="appoint"  propagation="REQUIRED"/>
 		</tx:attributes>
 	</tx:advice>
 
