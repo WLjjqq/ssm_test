@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.mapper.OneToManyMapper">
+
+    <!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.ssm.bean.StudentTemp" id="studentClassMap">
+    <!-- property 表示com.ssm.bean.StudentTemp中的属性； column 表示表中的列名 -->
+    <id property="studentid" column="s_id" />
+    <result property="studentname" column="s_name" />
+        <!-- association字面意思关联，这里只专门做一对一关联； property表示是com.ssm.bean.StudentTemp中的属性名称；
+                javaType表示该属性是什么类型对象 -->
+        <association property="tempClass" javaType="com.ssm.bean.Class">
+            <!-- property 表示com.ssm.bean.Class中的属性； column 表示表中的列名 -->
+            <id property="classid" column="class_id" />
+            <result property="classname" column="class_name" />
+        </association>
+    </resultMap>
+
+    <!-- 1、 获取某学生以及该学生所在班级的信息 -->
+    <!-- 可以显示指出c.class_id,c.class_name,s.s_id,s.s_name列明，
+        如果用"*"代替，则mybatis会自动匹配resultMap中提供的列名 -->
+    <select id="getStudentAndClass" parameterType="int" resultMap="studentClassMap">
+        select c.class_id,c.class_name,s.s_id,s.s_name
+        from Class c left join ClassStudent cs
+                on c.class_id = cs.class_id
+            left join Student s
+                on cs.student_id = s.s_id
+        where s.s_id = #{id}
+    </select>
+
+    <!-- 2、获取某学生以及该学生所在班级的信息，类似视图实现方式 -->
+    <!-- resultType 对应简单类型，也就是实体中的属性名称与数据库表字段名称一模一样；
+         resultMap 对应复杂类型，属性名称与字段名称不一样可以通过resultMap中property,column进行映射 -->
+    <select id="getStudentAndClassView" parameterType="int" resultType="com.ssm.bean.studentclass">
+        select c.class_id,c.class_name,s.s_id,s.s_name
+        from Class c left join ClassStudent cs
+                on c.class_id = cs.class_id
+            left join Student s
+                on cs.student_id = s.s_id
+        where s.s_id = #{id}
+    </select>
+
+    <!-- 3、获取某班级以及班级里面所有学生的信息 -->
+    <select id="getClassStudents" parameterType="int" resultMap="classStudentsMap">
+        select *
+        from Class c left join ClassStudent cs
+                on c.class_id = cs.class_id
+            left join Student s
+                on cs.student_id = s.s_id
+        where c.class_id = #{id}
+    </select>
+    <resultMap type="com.ssm.bean.ClassTemp" id="classStudentsMap">
+        <id property="classid" column="class_id"/>
+        <result property="classname" column="class_name"/>
+
+        <!-- property表示集合类型属性名称，ofType表示集合中的对象是什么类型 -->
+        <collection property="students" ofType="com.ssm.bean.Student">
+            <id property="studentid" column="s_id"/>
+            <result property="studentname" column="s_name"/>
+        </collection>
+    </resultMap>
+
+    <!--插入学生  parameterType表示入参的信息。一般用map-->
+    <insert id="saveStudentAndClass" parameterType="map">
+       insert into student
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="studentid !=null">s_id,</if>
+            <if test="studentname !=null">s_name</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+
+            <if test="studentid !=null">#{studentid},</if>
+            <if test="studentname !=null">#{studentname}</if>
+        </trim>
+    </insert>
+
+    <update id="updateStudent" parameterType="map">
+        update student
+        <set>
+            <if test="studentname != null">s_name = #{studentname,jdbcType=VARCHAR}</if>
+        </set>
+        WHERE
+        s_id = #{studentid,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteStudent" parameterType="map">
+        delete from student
+        where s_id=#{studentid,jdbcType=VARCHAR}
+    </delete>
+</mapper>

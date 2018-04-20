@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+
+	<context:component-scan base-package="com.ssm">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!-- Spring的配置文件，这里主要配置和业务逻辑有关的 -->
+	<!--=================== 数据源，事务控制，xxx ================-->
+	<context:property-placeholder location="classpath:dbconfig.properties" />
+	<bean id="pooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		<property name="user" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+
+	<!--================== 配置和MyBatis的整合=============== -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 指定mybatis全局配置文件的位置 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+		<property name="dataSource" ref="pooledDataSource"></property>
+		<!-- 指定mybatis，mapper文件的位置 -->
+		<property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+	</bean>
+
+	<!-- 配置扫描器，将mybatis接口的实现加入到ioc容器中 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!--扫描所有dao接口的实现，加入到ioc容器中 -->
+		<property name="basePackage" value="com.ssm.mapper"/>
+	</bean>
+
+
+
+	<!--基于xml去配置AOP
+	&lt;!&ndash;配置目标方法的类&ndash;&gt;
+	<bean id="employeeService" class="com.ssm.service.EmployeeService"></bean>
+	&lt;!&ndash;配置切面的类&ndash;&gt;
+	<bean id="testAop" class="com.ssm.aop.TestAop"/>
+	<aop:config>
+		&lt;!&ndash;切点表达式 要是利用注解的话，直接在哪个方法前加上这句话就行了。
+		@Before("execution(* com.ssm.service.EmployeeService.*(..))")
+		XML中是把这一步拆分成两步，切点表达式一步，哪个方法用什么切面一步。然后利用pointcut-ref去与切点表达式的id进行匹配。
+		&ndash;&gt;
+		<aop:pointcut id="pointcut" expression="execution(* com.ssm.service.EmployeeService.*(..))"/>
+		&lt;!&ndash;配置切面&ndash;&gt;
+		<aop:aspect ref="testAop">
+			<aop:before method="TestAopMethod" pointcut-ref="pointcut"/>
+		</aop:aspect>
+	</aop:config>-->
+
+	<!--基于注解的方式进行事务管理。
+	<bean name="transactionManager"
+		  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="pooledDataSource"></property>
+	</bean>
+	&lt;!&ndash;proxy-target-class="true" 不加上的话会出现Unsatisfied dependency expressed through field 'accountServiceimpl';
+		字段accountServiceimpl不通过依赖关系。这个错误。
+		这样就可以实现基于实现类类接收，proxy-target-class 默认未false 不过要这么实现的话，你得引入CGLIB来做代理才行。
+	&ndash;&gt;
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>-->
+
+	<!--创建事务管理器-->
+	<bean name="transactionManager"
+		  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!--用事务管理器去管理数据源-->
+		<property name="dataSource" ref="pooledDataSource"></property>
+	</bean>
+	<!--配置通知。哪些方法需要切入什么类型的事务。-->
+	<tx:advice id="advice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!--是AccountServiceImpl类中的transfer方法添加上事务。-->
+			<tx:method name="transfer" propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice>
+
+	<!--配置切面表达式, 并且让 tx与切面表达式合二为一-->
+	<aop:config proxy-target-class="true">
+		<!--表达式, 定义哪个包的哪些类需要切入事务,但是此处并且没有制定类中哪些方法,需要切入什么样 事务-->
+		<aop:pointcut expression="execution(* com.ssm.service.impl.*.*(..))" id="pointcut" />
+		<aop:advisor advice-ref="advice" pointcut-ref="pointcut"/>
+	</aop:config>
+
+</beans>

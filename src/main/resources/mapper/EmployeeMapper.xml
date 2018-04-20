@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.mapper.EmployeeMapper">
+
+    <resultMap type="com.ssm.bean.Employee" id="Base_ResultMap">
+        <id column="emp_id" property="empId" jdbcType="INTEGER"/>
+        <result column="emp_name" property="empName" jdbcType="VARCHAR"/>
+        <result column="emp_salary" property="empSalary" jdbcType="DOUBLE"/>
+        <result column="emp_age" property="empAge" jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+  	emp_id,emp_name,emp_salary,emp_age
+  </sql>
+    <select id="selectEmployee" resultMap="Base_ResultMap" resultType="com.ssm.bean.Employee">
+        select
+        <include refid="Base_Column_List"/>
+        from table_emp
+    </select>
+
+    <insert id="insertEmployee" parameterType="com.ssm.bean.Employee">
+        insert into table_emp values(#{empId},#{empName},#{empSalary},#{empAge})
+    </insert>
+</mapper>
