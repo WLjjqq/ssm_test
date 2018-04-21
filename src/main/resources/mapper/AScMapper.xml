@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.mapper.AScMapper">
+	<resultMap id="Base_ResultMap" type="java.util.Map">
+		<id column="s_id" property="sId" jdbcType="INTEGER"/>
+		<result column="c_id" property="cId" jdbcType="INTEGER"/>
+		<result column="score" property="sCore" jdbcType="VARCHAR"/>
+	</resultMap>
+	<!--查询学生平均成绩及其名次 -->
+    <select id="selectAvg" resultMap="Base_ResultMap">
+		SELECT 1+(SELECT COUNT( distinct 平均成绩)
+              FROM (SELECT S_ID,AVG(score) AS 平均成绩
+                      FROM A_SC
+                  GROUP BY S_ID
+                  ) AS T1
+            WHERE 平均成绩 > T2.平均成绩) as 名次,
+      S_ID as 学生学号,平均成绩
+    FROM (SELECT S_ID,AVG(score) 平均成绩
+            FROM A_SC
+        GROUP BY S_ID
+        ) AS T2
+    ORDER BY 平均成绩 desc
+	</select>
+	<!--查询各科成绩最高和最低的分：以如下形式显示：课程ID，最高分，最低分 -->
+	<select id="selectMaxAndMin" resultMap="Base_ResultMap">
+			SELECT L.C_ID As 课程ID,L.score AS 最高分,R.score AS 最低分
+	FROM A_SC L ,A_SC AS R
+	WHERE L.C_ID = R.C_ID and
+	L.score = (SELECT MAX(IL.score)
+	FROM A_SC AS IL,A_Student AS IM
+	WHERE L.C_ID = IL.C_ID and IM.S_ID=IL.S_ID
+	GROUP BY IL.C_ID)
+	AND
+	R.Score = (SELECT MIN(IR.score)
+	FROM A_SC AS IR
+	WHERE R.C_ID = IR.C_ID
+	GROUP BY IR.C_ID
+	)
+	</select>
+</mapper>
