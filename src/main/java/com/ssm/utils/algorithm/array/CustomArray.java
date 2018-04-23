@@ -100,8 +100,8 @@ public class CustomArray {
                 //下标k不为0.后面的都往前移动一个。
                 for(int i=k;i<elems-1; i++){
                     intArray[i]=intArray[i+1];
-                    elems--;
                 }
+                elems--;
             }
         }
         return true;
