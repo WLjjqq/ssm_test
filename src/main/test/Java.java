@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.ssm.utils.algorithm.array.Array.listHasAElement;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:applicationContext.xml"})
 public class Java {
@@ -38,6 +40,28 @@ public class Java {
       System.out.println(str);
    }
 
+   @Test
+   public void test3(){
+       int[] a=new int[5];
+       a[1]=1;
+       a[2]=2;
+       System.out.println("头开始的值"+a[2]);
+       a[2]=0;
+       System.out.println("后来的值"+a[2]);
+       System.out.println(a.length);
+   }
 
 
+   @Test
+   public void test4(){
+       String name="li";
+       List<String> list = new ArrayList<>();
+       list.add("li");
+       list.add("zhao");
+        if(listHasAElement(list,name)){
+            System.out.println("true");
+        }else {
+            System.out.println("false");
+        }
+   }
 }
