@@ -37,4 +37,38 @@
 	GROUP BY IR.C_ID
 	)
 	</select>
+	<!--查询“001”课程比“002”课程成绩高的所有学生的学号；-->
+<select id="selectAGreaterB" parameterType="map"  resultMap="Base_ResultMap">
+	select a.s_id
+	FROM
+	(select aa.s_id,aa.score
+	from a_sc aa
+	where aa.c_id =#{cId}) a,
+	(select bb.s_id,bb.score
+	from a_sc bb
+	where bb.c_id =#{cId2}) b
+	where a.score>b.score
+	and a.s_id=b.s_id
+</select>
+	<!--查询平均成绩大于60的学生的学号，平均成绩-->
+<select id="selectAvgGreaterScore" parameterType="java.lang.Integer" resultMap="Base_ResultMap">
+	select a.s_id,avg(a.score) score
+	from a_sc a
+	GROUP BY a.s_id
+	HAVING AVG(score) >#{score}
+</select>
+<!--查询所有同学的学号、姓名、选课数、总成绩； -->
+	<select id="selectCountXuanKeShu" resultMap="Base_ResultMap">
+		select a.s_id,stu.sname,COUNT(DISTINCT c_id) count,SUM(a.score)
+		from a_sc a
+		inner JOIN a_student stu
+		on a.s_id = stu.s_id
+		GROUP BY a.s_id
+	</select>
+	<!--查询李姓老师有多少个-->
+	<select id="selectCountLiTeacher"  resultType="java.lang.Integer">
+		SELECT count(teacher.t_id)
+		FROM a_teacher teacher
+		where teacher.tname like '李%'
+	</select>
 </mapper>
