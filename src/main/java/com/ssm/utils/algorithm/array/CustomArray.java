@@ -93,11 +93,11 @@ public class CustomArray {
             System.out.println("不存在");
             return false;
         }else{
-            //当下标k为0的时候
+            //判断k是不是最后一个
             if(k == elems -1){
                 elems--;
             }else {
-                //下标k不为0.后面的都往前移动一个。
+                //下标k不是最后一个。后面的都往前移动一个。
                 for(int i=k;i<elems-1; i++){
                     intArray[i]=intArray[i+1];
                 }
