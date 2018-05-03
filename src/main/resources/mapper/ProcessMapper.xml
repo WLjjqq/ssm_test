@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.mapper.ProcessMapper">
+	<resultMap id="Base_ResultMap" type="com.ssm.bean.Process">
+		<id column="id" property="id" jdbcType="INTEGER"/>
+		<result column="name" property="name" jdbcType="VARCHAR"/>
+		<result column="status" property="status" typeHandler="com.ssm.enums.CodeEnumTypeHandler"/>
+	</resultMap>
+
+
+	<select id="selectProcess"  resultMap="Base_ResultMap">
+		select * from process where id=#{id}
+	</select>
+<!--使用 in 查询出多个id-->
+	<select id="selectAllProcess"  resultMap="Base_ResultMap">
+		select * from process
+		<where>
+			<foreach collection="list" item="id" open="id in (" close=")" separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</select>
+
+	<insert id="insertProcess" parameterType="com.ssm.bean.Process">
+		insert into process values (#{id},#{name},#{status,typeHandler=com.ssm.enums.CodeEnumTypeHandler})
+	</insert>
+</mapper>

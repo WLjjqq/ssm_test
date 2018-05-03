@@ -11,11 +11,14 @@ public class test {
         }
     }
     public static void main(String[] args) {
-        test t =new test();
+        /*test t =new test();
         if(t.test()){
             System.out.println("if后面跟的是true");
         }else{
             System.out.println("if后面跟的是false");
-        }
+        }*/
+        Integer integer = new Integer(2);
+        int a =integer.intValue();
+        System.out.println(a);
     }
 }

@@ -1,12 +1,13 @@
 package com.ssm.java;
 
+
 /**
  * Super
  * usage1:super.  直接去调用父类的方法和属性。
  * usage2:放在构造器中的第一位，代表引用父类的构造器。
  */
 class SuperSub {
-    String name;
+    String name ;
     void value() {
         name = "China";
     }

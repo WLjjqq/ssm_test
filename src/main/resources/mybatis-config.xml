@@ -7,8 +7,10 @@
 		<!-- 打印查询语句 -->
 		<setting name="logImpl" value="STDOUT_LOGGING" />
 	</settings>
-
-
+	<!--使用枚举类。从数据库中查询的是10，转换成枚举类里的OPEN(查询）。传递是:OPEN 保存到数据库中是：10（保存）  -->
+	<typeHandlers>
+		<typeHandler handler="com.ssm.enums.CodeEnumTypeHandler" javaType="com.ssm.enums.ComputerState"/>
+	</typeHandlers>
 	<!--分页-->
 	<plugins>
 		<plugin interceptor="com.github.pagehelper.PageInterceptor">

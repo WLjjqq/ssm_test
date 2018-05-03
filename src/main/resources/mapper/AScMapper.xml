@@ -39,16 +39,30 @@
 	</select>
 	<!--查询“001”课程比“002”课程成绩高的所有学生的学号；-->
 <select id="selectAGreaterB" parameterType="map"  resultMap="Base_ResultMap">
-	select a.s_id
-	FROM
-	(select aa.s_id,aa.score
-	from a_sc aa
-	where aa.c_id =#{cId}) a,
-	(select bb.s_id,bb.score
-	from a_sc bb
-	where bb.c_id =#{cId2}) b
-	where a.score>b.score
-	and a.s_id=b.s_id
+			SELECT
+			aaa.s_id
+		FROM
+			(
+				SELECT
+					aa.s_id,
+					aa.score
+				FROM
+					a_sc aa
+				WHERE
+					aa.c_id = #{cId}
+			) aaa
+		INNER JOIN
+			(
+				SELECT
+					bb.s_id,
+					bb.score
+				FROM
+					a_sc bb
+				WHERE
+					bb.c_id = #{cId2}
+			) bbb
+		on aaa.s_id=bbb.s_id
+		where aaa.score>bbb.score
 </select>
 	<!--查询平均成绩大于60的学生的学号，平均成绩-->
 <select id="selectAvgGreaterScore" parameterType="java.lang.Integer" resultMap="Base_ResultMap">
@@ -66,9 +80,74 @@
 		GROUP BY a.s_id
 	</select>
 	<!--查询李姓老师有多少个-->
-	<select id="selectCountLiTeacher"  resultType="java.lang.Integer">
+	<select id="selectCountLiTeacher" parameterType="java.lang.String" resultType="java.lang.Integer">
 		SELECT count(teacher.t_id)
 		FROM a_teacher teacher
-		where teacher.tname like '李%'
+		where teacher.tname like concat(concat(#{tName}),'%')
 	</select>
+    <!--查询没学过“叶平”老师课的同学的学号、姓名； -->
+    <select id="selectSnameAndSid" resultMap="Base_ResultMap">
+        SELECT s.s_id,s.sname
+        FROM a_student s
+        where s.s_id not in
+        (SELECT s.s_id
+        from a_teacher t
+        INNER JOIN a_sc a
+        on a.c_id=t.t_id
+        INNER JOIN a_student s
+        on a.s_id=s.s_id
+        where t.tname="叶平")
+    </select>
+	<!--查询学过“001”并且也学过编号“002”课程的同学的学号、姓名； -->
+	<select id="select001And002" parameterType="java.lang.Integer" resultMap="Base_ResultMap">
+			SELECT
+				a_student.s_id,
+				a_student.sname
+			FROM
+				a_student
+			INNER JOIN a_SC ON a_student.s_id = a_sc.s_id
+			WHERE
+				a_student.s_id = a_sc.s_id
+			AND a_sc.c_id = #{param1}
+			AND EXISTS (
+				SELECT
+					*
+				FROM
+					a_sc AS SC_2
+				WHERE
+					SC_2.S_id = a_sc.s_id
+				AND SC_2.c_id =#{param2}
+			);
+	</select>
+	<!--学叶平老师教的所有课的学生的学号，姓名-->
+<select id="selectYepingAllCourse" resultMap="Base_ResultMap">
+			SELECT
+			a.s_id,
+			a.sname
+		FROM
+			a_student a
+		WHERE
+			a.s_id IN (
+				SELECT
+			a.s_id
+		FROM
+			a_sc a
+		INNER JOIN a_course b ON a.c_id = b.c_id
+		INNER JOIN a_teacher c ON c.t_id = b.t_id
+		WHERE
+			c.tname = #{name}
+		GROUP BY
+			a.s_id
+		HAVING
+			count(a.c_id) = (
+				SELECT
+					count(a_course.c_id)
+				FROM
+					a_course
+				INNER JOIN a_teacher ON a_teacher.t_id = a_course.t_id
+				WHERE
+					a_teacher.tname = #{name}
+			)
+			);
+</select>
 </mapper>

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class A_ScTest extends BaseTest {
     @Autowired
@@ -75,7 +76,58 @@ public class A_ScTest extends BaseTest {
      */
     @Test
     public void testSelectCountLiTeacher(){
-        int a = ascMapper.selectCountLiTeacher();
+        String tName="李";
+        int a = ascMapper.selectCountLiTeacher(tName);
         System.out.println(a);
+    }
+
+    /**
+     * 查询没学过“叶平”老师课的同学的学号、姓名；
+     */
+    @Test
+    public void testSelectSnameAndSid(){
+        List<Map<String, Object>> list = ascMapper.selectSnameAndSid();
+        for (Map<String,Object> i:list
+                ) {
+            System.out.println(i);
+        }
+    }
+
+    /**
+     * 查询学过“001”并且也学过编号“002”课程的同学的学号、姓名；
+     */
+    @Test
+    public void testSelect001And002(){
+        List<Map<String, Object>> list = ascMapper.select001And002(002,001);
+        for (Map<String,Object> i:list){
+            System.out.println(i);
+        }
+
+        for(int i=0;i<list.size();i++){
+            Map map=list.get(i);
+            //是用set来接收的。不能重复。无顺序
+            Set set = map.keySet();
+            System.out.println("set的值 "+set);
+            Object sId = map.get("sId");
+            System.out.println("sId的值 "+sId);
+        }
+    }
+    /**
+     * 查询学过“叶平”老师所教的所有课的同学的学号、姓名；
+     */
+    @Test
+    public void testSelectYepingAllCourse(){
+        List<Map<String, Object>> list = ascMapper.selectYepingAllCourse("李一");
+        for (Map<String,Object> i:list){
+            System.out.println(i);
+        }
+        for(int i=0;i<list.size();i++){
+            Map map=list.get(i);
+            //是用set来接收的。不能重复。无顺序
+            Set set = map.keySet();
+            System.out.println("set的值 "+set);
+            Object sId = map.get("sId");
+            System.out.println("得到sId的值 "+sId);
+        }
     }
 }
